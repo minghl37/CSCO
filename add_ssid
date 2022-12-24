@@ -1,0 +1,50 @@
+; Add new ssid and vlan to IOS
+;
+; Replace 0000 with VLAN ID
+; Replace SSID_NAME with ssid and WPA_KEY with ClearText password
+; Replace PASSWORD with enter privileged mode (from EXEC)
+; To make permanent, uncomment 'copy running-config startup-config'
+; Use ssh [-E log_file] [-i identity_file] user@address [< command_file]
+;
+;
+enable
+PASSWORD
+configure terminal
+dot11 ssid SSID_NAME
+vlan 0000
+authentication open
+authentication key-management wpa version 2
+mbssid guest-mode
+wpa-psk ascii 0 WPA_KEY
+exit
+
+interface Dot11Radio0
+encryption vlan 0000 mode ciphers aes-ccm
+ssid SSID_NAME
+exit
+
+interface Dot11Radio0.0000
+encapsulation dot1Q 0000
+no ip route-cache
+no cdp enable
+bridge-group 0000
+bridge-group 0000 subscriber-loop-control
+bridge-group 0000 spanning-disabled
+bridge-group 0000 port-protected
+bridge-group 0000 block-unknown-source
+no bridge-group 0000 source-learning
+no bridge-group 0000 unicast-flooding
+exit
+
+interface GigabitEthernet0.0000
+encapsulation dot1Q 0000
+no ip route-cache
+no cdp enable
+bridge-group 0000
+bridge-group 0000 spanning-disabled
+no bridge-group 0000 source-learning
+exit
+
+; uncomment next line to make permanent
+; copy running-config startup-config
+end
